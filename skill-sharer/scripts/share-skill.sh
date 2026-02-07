@@ -4,8 +4,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_NAME="Enterprise-Crew-skills"
-REPO_OWNER="henrino3"
+REPO_NAME="${SKILL_SHARER_REPO:-Enterprise-Crew-skills}"
+REPO_OWNER="${SKILL_SHARER_OWNER:-<your-github-user>}"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}"
 WORK_DIR="/tmp/skill-sharer-$$"
 
