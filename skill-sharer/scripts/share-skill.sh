@@ -79,6 +79,9 @@ fi
 echo "🧹 Sanitizing skill files..."
 mkdir -p "$WORK_DIR/repo/$SKILL_NAME"
 bash "$SCRIPT_DIR/sanitize.sh" "$SKILL_PATH" "$WORK_DIR/repo/$SKILL_NAME"
+
+# Never publish the local rules conf
+rm -f "$WORK_DIR/repo/$SKILL_NAME/scripts/sanitize-rules.conf" 2>/dev/null
 echo ""
 
 # Step 4: Generate README for the skill

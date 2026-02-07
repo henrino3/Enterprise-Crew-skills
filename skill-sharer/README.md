@@ -9,7 +9,6 @@ skill-sharer/
 ├── README.md
 ├── SKILL.md
 ├── scripts/generate-readme.sh
-├── scripts/sanitize-rules.conf
 ├── scripts/sanitize.sh
 ├── scripts/share-skill.sh
 ├── scripts/update-index.sh
