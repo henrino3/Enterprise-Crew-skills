@@ -9,6 +9,7 @@ Open-source skills and scripts built by the [Enterprise Crew](https://github.com
 | [session-cleaner](./session-cleaner/) | Converts OpenClaw session JSONL files into clean, readable markdown transcripts. Strips tool calls and noise, keeps the conversation. |
 | [skill-sharer](./skill-sharer/) | Share skills publicly to GitHub with automatic sanitization of personal info, secrets, and IPs |
 | [x-video-transcribe](./x-video-transcribe/) | Transcribe and summarize X/Twitter videos using bird CLI + Gemini audio transcription |
+| [daily-review](./daily-review/) | Comprehensive daily performance review with communication tracking, meeting analysis, output metrics, and focus time monitoring |
 
 ## About
 
