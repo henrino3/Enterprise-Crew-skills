@@ -13,24 +13,37 @@ if [[ ! -f "$README" ]]; then
   exit 1
 fi
 
+NEW_LINE="| [${SKILL_NAME}](./${SKILL_NAME}/) | ${DESCRIPTION} |"
+
 # Check if skill already in the table
-if grep -q "| \[${SKILL_NAME}\]" "$README"; then
-  # Update existing entry
-  sed -i "s|^\(| \[${SKILL_NAME}\].*\)|$|" "$README"
-  sed -i "s|^| \[${SKILL_NAME}\].*|$|" "$README" 2>/dev/null || true
-  # Replace the line
-  sed -i "/| \[${SKILL_NAME}\]/c\\| [${SKILL_NAME}](./${SKILL_NAME}/) | ${DESCRIPTION} |" "$README"
+if grep -qF "| [${SKILL_NAME}]" "$README"; then
+  # Remove old entry, then re-add
+  grep -vF "| [${SKILL_NAME}]" "$README" > "$README.tmp"
+  mv "$README.tmp" "$README"
+  
+  # Find last table line and insert after it
+  LAST_TABLE_LINE=$(grep -n "^|" "$README" | tail -1 | cut -d: -f1)
+  if [[ -n "$LAST_TABLE_LINE" ]]; then
+    head -n "$LAST_TABLE_LINE" "$README" > "$README.tmp"
+    echo "$NEW_LINE" >> "$README.tmp"
+    tail -n +"$((LAST_TABLE_LINE + 1))" "$README" >> "$README.tmp"
+    mv "$README.tmp" "$README"
+  else
+    echo "$NEW_LINE" >> "$README"
+  fi
   echo "✅ Updated existing entry for $SKILL_NAME in README"
 else
-  # Add new entry before the last empty line after the table
-  # Find the table and append
+  # Find last table line and append after it
   LAST_TABLE_LINE=$(grep -n "^|" "$README" | tail -1 | cut -d: -f1)
   
   if [[ -n "$LAST_TABLE_LINE" ]]; then
-    sed -i "${LAST_TABLE_LINE}a\\| [${SKILL_NAME}](./${SKILL_NAME}/) | ${DESCRIPTION} |" "$README"
+    head -n "$LAST_TABLE_LINE" "$README" > "$README.tmp"
+    echo "$NEW_LINE" >> "$README.tmp"
+    tail -n +"$((LAST_TABLE_LINE + 1))" "$README" >> "$README.tmp"
+    mv "$README.tmp" "$README"
     echo "✅ Added $SKILL_NAME to README index"
   else
-    echo "⚠️  Could not find table in README — appending manually"
-    echo "| [${SKILL_NAME}](./${SKILL_NAME}/) | ${DESCRIPTION} |" >> "$README"
+    echo "⚠️  Could not find table in README — appending"
+    echo "$NEW_LINE" >> "$README"
   fi
 fi

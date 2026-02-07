@@ -19,29 +19,29 @@ Publishes a local skill to **<your-github-user>/Enterprise-Crew-skills** on GitH
 
 ```bash
 # Share a skill (interactive — reviews sanitization before pushing)
-~/clawd/skills/skill-sharer/scripts/share-skill.sh <skill-folder-path> [--description "Short description"]
+~/agent-workspace/skills/skill-sharer/scripts/share-skill.sh <skill-folder-path> [--description "Short description"]
 ```
 
 ### Examples
 
 ```bash
 # Share session-cleaner
-~/clawd/skills/skill-sharer/scripts/share-skill.sh ~/clawd/scripts/session-cleaner/ --description "Converts session JSONL to clean markdown"
+~/agent-workspace/skills/skill-sharer/scripts/share-skill.sh ~/agent-workspace/scripts/session-cleaner/ --description "Converts session JSONL to clean markdown"
 
 # Share a skill from the skills directory
-~/clawd/skills/skill-sharer/scripts/share-skill.sh ~/clawd/skills/weather/ --description "Get weather forecasts with no API key"
+~/agent-workspace/skills/skill-sharer/scripts/share-skill.sh ~/agent-workspace/skills/weather/ --description "Get weather forecasts with no API key"
 ```
 
 ## Sanitization rules
 
 The script strips:
 - **IP addresses** — Tailscale IPs, public IPs, local IPs (replaced with `<REDACTED_IP>`)
-- **Paths with usernames** — `/home/user/`, `/home/otheruser/` → generic paths
+- **Paths with usernames** — `/home/user/`, `/home/user/` → generic paths
 - **API keys and tokens** — anything matching key/token/secret patterns
 - **Email addresses** — real emails replaced with `user@example.com`
 - **SSH connection strings** — `ssh user@host` → `ssh user@<your-host>`
 - **Server URLs with real hosts** — internal URLs replaced with placeholders
-- **Secret file references** — `~/clawd/secrets/*` → `<YOUR_SECRET_FILE>`
+- **Secret file references** — `~/agent-workspace/secrets/*` → `<YOUR_SECRET_FILE>`
 - **Tailscale hostnames** — machine names replaced
 - **Environment variable values** — actual values stripped, variable names kept
 
