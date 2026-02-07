@@ -16,7 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SESSIONS_DIR = process.env.SESSIONS_DIR || path.join(process.env.HOME, '.clawdbot/agents/main/sessions');
+const SESSIONS_DIR = process.env.SESSIONS_DIR || path.join(process.env.HOME, '.openclaw/agents/main/sessions');
 const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(__dirname, '../memory/sessions');
 
 // Ensure output directory exists

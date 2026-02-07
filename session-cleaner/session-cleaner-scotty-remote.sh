@@ -1,13 +1,13 @@
 #!/bin/bash
 # Session Cleaner for Scotty (run on Pi via SSH)
-# Usage: ssh jamify@100.68.207.75 '~/clawd/scripts/session-cleaner-scotty.sh'
+# Usage: ssh user@<your-host> '~/agent-workspace/scripts/session-cleaner-scotty.sh'
 
-SESSIONS_DIR="/home/jamify/.clawdbot/agents/main/sessions"
-OUTPUT_DIR="/home/jamify/clawd/memory/sessions"
+SESSIONS_DIR="/home/user/.openclaw/agents/main/sessions"
+OUTPUT_DIR="/home/user/agent-workspace/memory/sessions"
 
 mkdir -p "$OUTPUT_DIR"
 
-cd /home/jamify/clawd/scripts || exit 1
+cd /home/user/agent-workspace/scripts || exit 1
 
 # Process each session file
 for file in "$SESSIONS_DIR"/*.jsonl; do

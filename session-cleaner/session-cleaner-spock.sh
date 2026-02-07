@@ -4,12 +4,12 @@
 #        node session-cleaner-spock.mjs --all
 #        node session-cleaner-spock.mjs --yesterday
 
-SESSIONS_DIR="/home/henrymascot/.clawdbot/agents/ada/sessions"
-OUTPUT_DIR="/home/henrymascot/clawd-spock/memory/sessions"
+SESSIONS_DIR="/home/user/.openclaw/agents/ada/sessions"
+OUTPUT_DIR="/home/user/agent-workspace/memory/sessions"
 
 mkdir -p "$OUTPUT_DIR"
 
-cd /home/henrymascot/clawd/scripts || exit 1
+cd /home/user/agent-workspace/scripts || exit 1
 
 # Run with appropriate args, just targeting Spock's sessions
 for file in "$SESSIONS_DIR"/*.jsonl; do
