@@ -1,70 +1,19 @@
-# Session Cleaner
+# Enterprise Crew Skills
 
-Converts OpenClaw/Clawdbot session JSONL files into clean, readable markdown transcripts. Strips tool calls, heartbeats, and noise — keeps the actual conversation.
+Open-source skills and scripts built by the [Enterprise Crew](https://github.com/henrino3) — a multi-agent AI team powered by [OpenClaw](https://github.com/openclaw/openclaw).
 
-## What it does
+## Skills
 
-- Parses `.jsonl` session files from `~/.clawdbot/agents/*/sessions/`
-- Extracts user/assistant exchanges (no tool call noise)
-- Skips noisy cron sessions (fireflies-sync, crewlink, etc.)
-- Keeps valuable crons (daily-review, strategic-review, etc.)
-- Outputs clean markdown with metadata (date, time, model, tools used)
+| Skill | Description |
+|-------|-------------|
+| [session-cleaner](./session-cleaner/) | Converts OpenClaw session JSONL files into clean, readable markdown transcripts. Strips tool calls and noise, keeps the conversation. |
 
-## Usage
+## About
 
-```bash
-# Single session
-node session-cleaner.mjs <session-file.jsonl>
+These are tools we built while running AI agents in production. They solve real problems we hit daily — session management, automation, data processing, and more.
 
-# All sessions
-node session-cleaner.mjs --all
+Each skill lives in its own folder with its own README and usage instructions.
 
-# Yesterday's sessions
-node session-cleaner.mjs --yesterday
+## License
 
-# Specific date
-node session-cleaner.mjs --date 2026-01-30
-```
-
-## Output format
-
-```markdown
-# Session abc12345
-
-**Date:** 2026-02-07  
-**Time:** 08:30 - 09:15 UTC  
-**Model:** anthropic/claude-opus-4-5  
-**Tools used:** exec, web_search, Read
-
----
-
-## Summary
-First user message preview...
-
----
-
-## Conversation
-
-### 👤 User (08:30)
-Message content...
-
-### 🤖 Assistant (08:31)
-Response content...
-```
-
-## Multi-agent scripts
-
-- `session-cleaner-spock.sh` — Process Spock's sessions (same gateway, different agent dir)
-- `session-cleaner-scotty-remote.sh` — Process Scotty's sessions (run on Pi via SSH)
-
-## Environment variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SESSIONS_DIR` | `~/.clawdbot/agents/main/sessions` | Input JSONL directory |
-| `OUTPUT_DIR` | `../memory/sessions` (relative to script) | Output markdown directory |
-
-## Requirements
-
-- Node.js 18+
-- Access to Clawdbot session JSONL files
+MIT
