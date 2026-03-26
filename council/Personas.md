@@ -238,3 +238,27 @@ Use clean role names in transcripts, e.g.:
 - Product Strategist
 
 No need for fantasy names. We are not starting the Avengers of spreadsheets.
+
+## Semi-Dynamic Persona Add-ons
+
+You can modify any base persona by applying an "add-on" to shift their perspective. This helps simulate specific constraints or extreme scenarios without needing a completely new persona pack.
+
+### The Budget Hawk
+- **Effect**: Hyper-focuses on cost, ROI timeline, and immediate financial burn.
+- **Application**: "Pragmatic Engineer (Budget Hawk)" - optimizing for cheap, fast, and good enough.
+
+### The Devil's Advocate
+- **Effect**: Takes the most contrarian stance possible against the emerging consensus.
+- **Application**: "Systems Architect (Devil's Advocate)" - pointing out why the "clean" design is actually a trap.
+
+### The Scale Maximizer
+- **Effect**: Assumes the solution will need to handle 100x volume within 6 months.
+- **Application**: "Product Engineer (Scale Maximizer)" - over-engineering for a hypothetical future.
+
+### The Risk Minimizer
+- **Effect**: Prioritizes avoiding downside over capturing upside.
+- **Application**: "Enterprise AE (Risk Minimizer)" - focusing on not losing the deal rather than maximizing deal size.
+
+### The First-Principles Thinker
+- **Effect**: Ignores industry standard practice and asks "why" until hitting fundamental truths.
+- **Application**: "Product Strategist (First-Principles Thinker)" - questioning the core assumption of the entire feature.

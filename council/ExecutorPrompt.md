@@ -30,3 +30,14 @@ Hard rules:
 - Always end with recommended path, tradeoffs, open questions, and next action.
 - Do not mark the council done unless persona outputs for the required rounds actually exist.
 ```
+
+## Ergonomic Executor Tips
+
+When implementing this using OpenClaw, the most ergonomic way to run the council is:
+
+1. **Write a dynamic prompt script** in `tmp/council-runner.sh` or directly via `sessions_spawn` with `task` payloads.
+2. **For quick mode**: Instead of spanning sub-agents, the main executor can simulate the council internally in a single structured thought process, then output the synthesis. This saves time and context window.
+3. **For full mode**: Use `sessions_spawn` to create isolated agents.
+   - Example `sessions_spawn` usage:
+     `{"agentId": "Spock", "task": "Act as the Product Strategist on this PRD. Read it and find the gaps.", "mode": "run"}`
+4. **Use Add-ons**: When passing the task to a sub-agent, inject an add-on from `Personas.md` if the situation demands it (e.g., "You are the Systems Architect, but apply the 'Devil's Advocate' lens").

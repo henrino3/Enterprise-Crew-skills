@@ -197,3 +197,12 @@ See `Personas.md`.
 - This skill is deliberately **topic-aware**, unlike the original fixed Architect/Designer/Engineer/Researcher quartet.
 - For pure attack-mode, use a red-team pattern instead.
 - For single-model self-critique, `3pass` is cheaper. Council is for higher-stakes calls.
+
+## Enhancements and Examples
+
+This skill has been upgraded for better AI executor ergonomics and output quality:
+
+- **Add-ons**: You can now apply constraints like "Budget Hawk" or "Devil's Advocate" from `Personas.md` to dynamically shift a persona's perspective.
+- **Ergonomics**: See `ExecutorPrompt.md` for instructions on how to comfortably use `sessions_spawn` and pass add-ons to sub-agents.
+- **Transcripts**: See `examples/engineering-council.md` for a model output of productive disagreement and synthesis.
+- **Benchmarking**: Use `benchmarks/output-benchmarking.md` to self-evaluate the council output (target score > 70) before presenting it to the user.
