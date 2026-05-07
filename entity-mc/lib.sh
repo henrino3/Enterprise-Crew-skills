@@ -7,6 +7,7 @@ ENTITY_MC_WORKSPACE="$(cd "$ENTITY_MC_SKILL_DIR/../.." && pwd)"
 # NEVER source from $ENTITY_MC_WORKSPACE/scripts/ — on remote agents those
 # are wrapper stubs from a prior install, causing infinite exec loops.
 ENTITY_MC_SOURCE_SCRIPTS_DIR="$ENTITY_MC_SKILL_DIR/source-scripts"
+ENTITY_MC_SOURCE_CONTEXT_DIR="$ENTITY_MC_SKILL_DIR/context"
 ENTITY_MC_VERSION="$(cat "$ENTITY_MC_SKILL_DIR/VERSION")"
 ENTITY_MC_MANIFEST_PATH=""
 
@@ -69,6 +70,7 @@ entity_mc_load_manifest() {
   ENTITY_MC_RUNTIME_DIR="$ENTITY_MC_STATE_DIR/runtime"
   ENTITY_MC_RELEASES_DIR="$ENTITY_MC_STATE_DIR/releases"
   ENTITY_MC_BACKUP_DIR="$ENTITY_MC_STATE_DIR/backups"
+  ENTITY_MC_CONTEXT_DIR="$ENTITY_MC_STATE_DIR/context"
   ENTITY_MC_CURRENT_LINK="$ENTITY_MC_STATE_DIR/current"
   ENTITY_MC_MODE="${ENTITY_MC_MODE_OVERRIDE:-${ENTITY_MC_MODE:-copy}}"
   ENTITY_MC_INSTALL_CRON="${ENTITY_MC_INSTALL_CRON_OVERRIDE:-${ENTITY_MC_INSTALL_CRON:-true}}"
@@ -83,6 +85,7 @@ entity_mc_load_manifest() {
   ENTITY_MC_MC_URL="${ENTITY_MC_MC_URL:-http://<REDACTED_IP>:<PORT>}"
   ENTITY_MC_CRON_TAG="${ENTITY_MC_CRON_TAG:-ENTITY_MC:${ENTITY_MC_AGENT_NAME}}"
   ENTITY_MC_RELEASE_DIR="$ENTITY_MC_RELEASES_DIR/$ENTITY_MC_VERSION"
+  ENTITY_MC_RELEASE_CONTEXT_DIR="$ENTITY_MC_RELEASE_DIR/context"
 }
 
 entity_mc_runtime_files() {
@@ -96,12 +99,21 @@ mc-intake.sh
 EOF
 }
 
+
+entity_mc_context_files() {
+  cat <<'EOF'
+mc-operating-rules.md
+entity-mc-context.md
+task-closure-contract.md
+EOF
+}
+
 entity_mc_log() {
   printf '[entity-mc] %s\n' "$*"
 }
 
 entity_mc_ensure_dirs() {
-  mkdir -p "$ENTITY_MC_TARGET_SCRIPTS_DIR" "$ENTITY_MC_STATE_DIR" "$ENTITY_MC_RELEASES_DIR" "$ENTITY_MC_BACKUP_DIR"
+  mkdir -p "$ENTITY_MC_TARGET_SCRIPTS_DIR" "$ENTITY_MC_STATE_DIR" "$ENTITY_MC_RELEASES_DIR" "$ENTITY_MC_BACKUP_DIR" "$ENTITY_MC_CONTEXT_DIR"
 }
 
 entity_mc_stage_release() {
@@ -119,6 +131,10 @@ entity_mc_stage_release() {
   while IFS= read -r file; do
     install -m 0755 "$ENTITY_MC_SOURCE_SCRIPTS_DIR/$file" "$ENTITY_MC_RELEASE_DIR/$file"
   done < <(entity_mc_runtime_files)
+  mkdir -p "$ENTITY_MC_RELEASE_CONTEXT_DIR"
+  while IFS= read -r file; do
+    install -m 0644 "$ENTITY_MC_SOURCE_CONTEXT_DIR/$file" "$ENTITY_MC_RELEASE_CONTEXT_DIR/$file"
+  done < <(entity_mc_context_files)
   printf '%s\n' "$ENTITY_MC_VERSION" > "$ENTITY_MC_RELEASE_DIR/VERSION"
   printf '%s\n' "$ENTITY_MC_MANIFEST_PATH" > "$ENTITY_MC_RELEASE_DIR/MANIFEST_PATH"
 }
@@ -144,6 +160,11 @@ entity_mc_activate_release() {
   while IFS= read -r file; do
     ln -sfn "$ENTITY_MC_RELEASE_DIR/$file" "$ENTITY_MC_RUNTIME_DIR/$file"
   done < <(entity_mc_runtime_files)
+  rm -rf "$ENTITY_MC_CONTEXT_DIR"
+  mkdir -p "$ENTITY_MC_CONTEXT_DIR"
+  while IFS= read -r file; do
+    ln -sfn "$ENTITY_MC_RELEASE_CONTEXT_DIR/$file" "$ENTITY_MC_CONTEXT_DIR/$file"
+  done < <(entity_mc_context_files)
   printf '%s\n' "$ENTITY_MC_VERSION" > "$ENTITY_MC_STATE_DIR/current-version"
 }
 
@@ -243,6 +264,7 @@ entity_mc_status_json() {
     --arg target_home "$ENTITY_MC_TARGET_HOME" \
     --arg scripts_dir "$ENTITY_MC_TARGET_SCRIPTS_DIR" \
     --arg state_dir "$ENTITY_MC_STATE_DIR" \
+    --arg context_dir "${ENTITY_MC_CONTEXT_DIR:-}" \
     --arg profile_name "$ENTITY_MC_PROFILE_NAME" \
-    '{agent:$agent, version:$version, mode:$mode, target_home:$target_home, scripts_dir:$scripts_dir, state_dir:$state_dir, profile_name:$profile_name}'
+    '{agent:$agent, version:$version, mode:$mode, target_home:$target_home, scripts_dir:$scripts_dir, state_dir:$state_dir, context_dir:$context_dir, profile_name:$profile_name}'
 }

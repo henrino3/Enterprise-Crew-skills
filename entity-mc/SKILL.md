@@ -1,6 +1,6 @@
 ---
 name: entity-mc
-description: Bootstrap Entity Mission Control helper runtime for crew agents with a shared canonical bundle, structured intake, per-agent manifest, safe cron install, verification, and rollback.
+description: Bootstrap Entity Mission Control helper runtime for crew agents with a shared canonical bundle, portable MC operating memory, structured intake, per-agent manifest, safe cron install, verification, and rollback.
 ---
 
 # Entity MC
@@ -14,12 +14,14 @@ This skill packages the current MC helper runtime into one installable bundle:
 - `mc-build-context.sh`
 - `mc-stall-check.sh`
 - `mc-intake.sh`
+- `.entity-mc/context/*.md` portable MC operating memory
 
 It also handles:
 - per-agent manifests
 - idempotent install/update
 - safe cron registration
 - optional structured intake from JSON/JSONL into MC tasks
+- portable MC operating context installed into the target `.entity-mc/context/` directory
 - post-install verification
 - rollback to the previous runtime
 
@@ -48,6 +50,7 @@ Optional:
 - `ENTITY_MC_ENABLE_STALL_CHECK` (`true|false`)
 - `ENTITY_MC_ENABLE_INTAKE` (`true|false`, default `false`)
 - `ENTITY_MC_INTAKE_SCHEDULE`
+- `ENTITY_MC_CONTEXT_DIR` (derived from `ENTITY_MC_STATE_DIR`, installed automatically)
 - `ENTITY_MC_AUTO_PULL_SCHEDULE`
 - `ENTITY_MC_STALL_CHECK_SCHEDULE`
 - `ENTITY_MC_PROFILE_NAME`
@@ -102,6 +105,7 @@ An install is only done when:
 - wrappers or symlinks exist in target scripts dir
 - version file is written
 - cron block is present exactly once when enabled
+- portable context files are installed
 - `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
 
@@ -132,3 +136,15 @@ bash scripts/mc-intake.sh scan-file .entity-mc/intake/inbox.jsonl --dry-run
 ```
 
 Optional cron support is controlled by `ENTITY_MC_ENABLE_INTAKE=true`; by default it is off because each host needs an explicit source watcher/inbox policy.
+
+## Portable operating memory
+
+This bundle installs portable MC context into `.entity-mc/context/` and `mc-build-context.sh` injects it into every pulled task. This is the small memory pack that makes a newly onboarded agent use MC properly without needing Ada's private workspace memory.
+
+Included context:
+
+- `mc-operating-rules.md` — when to use MC, lifecycle, evidence, duplicate avoidance.
+- `entity-mc-context.md` — what the runtime installs, manifest contract, structured intake behavior.
+- `task-closure-contract.md` — exact review/blocker note requirements.
+
+Keep these files public-safe. Do not add private hostnames, tokens, personal data, or Henry-specific secrets. Put host-specific facts in manifests or local memory, not in the public bundle.

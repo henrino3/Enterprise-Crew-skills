@@ -25,6 +25,15 @@ while IFS= read -r file; do
   [[ -e "$ENTITY_MC_TARGET_SCRIPTS_DIR/$file" ]] || fail "wrapper missing: $ENTITY_MC_TARGET_SCRIPTS_DIR/$file"
 done < <(entity_mc_runtime_files)
 
+[[ -d "$ENTITY_MC_CONTEXT_DIR" ]] || fail "context dir missing: $ENTITY_MC_CONTEXT_DIR"
+while IFS= read -r file; do
+  [[ -f "$ENTITY_MC_CONTEXT_DIR/$file" ]] || fail "context file missing: $file"
+done < <(entity_mc_context_files)
+
+INTAKE_DRY_RUN="$($ENTITY_MC_BASH_BIN "$ENTITY_MC_TARGET_SCRIPTS_DIR/mc-intake.sh" create --title "Entity MC verify dry run" --description "verify" --assignee "$ENTITY_MC_AGENT_NAME" --dry-run 2>/dev/null || true)"
+printf '%s' "$INTAKE_DRY_RUN" | jq -e '.action == "dry_run" and (.payload.metadata | contains("\"intake\":true"))' >/dev/null \
+  || fail "mc-intake dry-run failed"
+
 if [[ "$ENTITY_MC_INSTALL_CRON" == "true" ]]; then
   CRON_CONTENT="$(crontab -l 2>/dev/null || true)"
   echo "$CRON_CONTENT" | grep -q "# BEGIN ${ENTITY_MC_CRON_TAG}" || fail "cron begin marker missing"
