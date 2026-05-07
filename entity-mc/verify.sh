@@ -38,11 +38,15 @@ if [[ "$ENTITY_MC_INSTALL_CRON" == "true" ]]; then
   ')"
   AUTO_PULL_COUNT="$(printf '%s\n' "$BLOCK_CONTENT" | grep -c 'mc-auto-pull.sh' || true)"
   STALL_CHECK_COUNT="$(printf '%s\n' "$BLOCK_CONTENT" | grep -c 'mc-stall-check.sh' || true)"
+  INTAKE_COUNT="$(printf '%s\n' "$BLOCK_CONTENT" | grep -c 'mc-intake.sh' || true)"
   if [[ "$ENTITY_MC_ENABLE_AUTO_PULL" == "true" ]]; then
     [[ "$AUTO_PULL_COUNT" == "1" ]] || fail "expected 1 auto-pull cron entry, got $AUTO_PULL_COUNT"
   fi
   if [[ "$ENTITY_MC_ENABLE_STALL_CHECK" == "true" ]]; then
     [[ "$STALL_CHECK_COUNT" == "1" ]] || fail "expected 1 stall-check cron entry, got $STALL_CHECK_COUNT"
+  fi
+  if [[ "$ENTITY_MC_ENABLE_INTAKE" == "true" ]]; then
+    [[ "$INTAKE_COUNT" == "1" ]] || fail "expected 1 intake cron entry, got $INTAKE_COUNT"
   fi
 fi
 

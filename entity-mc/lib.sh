@@ -75,8 +75,10 @@ entity_mc_load_manifest() {
   ENTITY_MC_BASH_BIN="${ENTITY_MC_BASH_BIN:-bash}"
   ENTITY_MC_ENABLE_AUTO_PULL="${ENTITY_MC_ENABLE_AUTO_PULL:-true}"
   ENTITY_MC_ENABLE_STALL_CHECK="${ENTITY_MC_ENABLE_STALL_CHECK:-true}"
+  ENTITY_MC_ENABLE_INTAKE="${ENTITY_MC_ENABLE_INTAKE:-false}"
   ENTITY_MC_AUTO_PULL_SCHEDULE="${ENTITY_MC_AUTO_PULL_SCHEDULE:-*/30 * * * *}"
   ENTITY_MC_STALL_CHECK_SCHEDULE="${ENTITY_MC_STALL_CHECK_SCHEDULE:-0 */2 * * *}"
+  ENTITY_MC_INTAKE_SCHEDULE="${ENTITY_MC_INTAKE_SCHEDULE:-*/15 * * * *}"
   ENTITY_MC_PROFILE_NAME="${ENTITY_MC_PROFILE_NAME:-}"
   ENTITY_MC_MC_URL="${ENTITY_MC_MC_URL:-http://<REDACTED_IP>:<PORT>}"
   ENTITY_MC_CRON_TAG="${ENTITY_MC_CRON_TAG:-ENTITY_MC:${ENTITY_MC_AGENT_NAME}}"
@@ -90,6 +92,7 @@ mc-auto-pull.sh
 mc-assign-model.sh
 mc-build-context.sh
 mc-stall-check.sh
+mc-intake.sh
 EOF
 }
 
@@ -186,6 +189,16 @@ entity_mc_render_cron_block() {
       "$ENTITY_MC_AGENT_NAME" \
       "$ENTITY_MC_BASH_BIN" \
       "$ENTITY_MC_TARGET_SCRIPTS_DIR/mc-stall-check.sh" \
+      "$ENTITY_MC_STATE_DIR/cron.log"
+  fi
+  if [[ "$ENTITY_MC_ENABLE_INTAKE" == "true" ]]; then
+    printf '%s cd %q && MC_USER=%q %q %q scan-file %q >> %q 2>&1\n' \
+      "$ENTITY_MC_INTAKE_SCHEDULE" \
+      "$ENTITY_MC_WORKSPACE" \
+      "$ENTITY_MC_AGENT_NAME" \
+      "$ENTITY_MC_BASH_BIN" \
+      "$ENTITY_MC_TARGET_SCRIPTS_DIR/mc-intake.sh" \
+      "$ENTITY_MC_STATE_DIR/intake/inbox.jsonl" \
       "$ENTITY_MC_STATE_DIR/cron.log"
   fi
   printf '# END %s\n' "$ENTITY_MC_CRON_TAG"

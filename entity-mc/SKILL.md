@@ -1,6 +1,6 @@
 ---
 name: entity-mc
-description: Bootstrap Entity Mission Control helper runtime for crew agents with a shared canonical bundle, per-agent manifest, safe cron install, verification, and rollback.
+description: Bootstrap Entity Mission Control helper runtime for crew agents with a shared canonical bundle, structured intake, per-agent manifest, safe cron install, verification, and rollback.
 ---
 
 # Entity MC
@@ -13,11 +13,13 @@ This skill packages the current MC helper runtime into one installable bundle:
 - `mc-assign-model.sh`
 - `mc-build-context.sh`
 - `mc-stall-check.sh`
+- `mc-intake.sh`
 
 It also handles:
 - per-agent manifests
 - idempotent install/update
 - safe cron registration
+- optional structured intake from JSON/JSONL into MC tasks
 - post-install verification
 - rollback to the previous runtime
 
@@ -44,6 +46,8 @@ Optional:
 - `ENTITY_MC_MODE` (`copy` or `symlink`, default `copy`)
 - `ENTITY_MC_ENABLE_AUTO_PULL` (`true|false`)
 - `ENTITY_MC_ENABLE_STALL_CHECK` (`true|false`)
+- `ENTITY_MC_ENABLE_INTAKE` (`true|false`, default `false`)
+- `ENTITY_MC_INTAKE_SCHEDULE`
 - `ENTITY_MC_AUTO_PULL_SCHEDULE`
 - `ENTITY_MC_STALL_CHECK_SCHEDULE`
 - `ENTITY_MC_PROFILE_NAME`
@@ -98,4 +102,33 @@ An install is only done when:
 - wrappers or symlinks exist in target scripts dir
 - version file is written
 - cron block is present exactly once when enabled
+- `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
+
+## Auto task creation / intake
+
+Entity MC auto-pull executes tasks that already exist. Automatic task creation is handled by `mc-intake.sh`, bundled with the runtime.
+
+`mc-intake.sh` is deliberately source-agnostic and conservative: it accepts explicit structured JSON/JSONL candidates, dedupes against active tasks and its local seen log, and creates MC tasks. Source-specific watchers should call it rather than embedding task-creation logic.
+
+Examples:
+
+```bash
+# Create one task
+bash scripts/mc-intake.sh create \
+  --title "Investigate failed deploy" \
+  --description "Deploy log URL: ..." \
+  --assignee Scotty \
+  --source discord \
+  --source-id "channel/message" \
+  --url "https://discord.com/channels/..."
+
+# Ingest structured candidate from another watcher
+echo '{"title":"Fix docs link","description":"Broken in thread...","assignee":"Ada","source":"discord","source_id":"123/456"}' \
+  | bash scripts/mc-intake.sh ingest --json
+
+# Dry-run inbox JSONL processing
+bash scripts/mc-intake.sh scan-file .entity-mc/intake/inbox.jsonl --dry-run
+```
+
+Optional cron support is controlled by `ENTITY_MC_ENABLE_INTAKE=true`; by default it is off because each host needs an explicit source watcher/inbox policy.
