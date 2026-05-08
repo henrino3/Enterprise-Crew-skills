@@ -14,6 +14,7 @@ entity-mc/
 ├── lib.sh
 ├── rollback.sh
 ├── context/mc-intake-setup.md
+├── docs/onboarding-flow.md
 ├── source-scripts/mc-assign-model.sh
 ├── source-scripts/mc-auto-pull.sh
 ├── source-scripts/mc-build-context.sh

@@ -33,6 +33,7 @@ It also handles:
 - Shared helpers: `skills/entity-mc/lib.sh`
 - Manifests: `skills/entity-mc/manifests/*.env`
 - Runtime version: `skills/entity-mc/VERSION`
+- Onboarding flow doc: `skills/entity-mc/docs/onboarding-flow.md`
 
 ## Manifest contract
 
