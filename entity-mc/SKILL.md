@@ -58,11 +58,28 @@ Optional:
 
 ## Install
 
+Preferred one-command install from inside the target workspace:
+
+```bash
+bash skills/entity-mc/install-auto.sh
+```
+
+This creates an auto manifest for the current workspace, installs runtime wrappers, writes the Entity MC cron block, and runs verification.
+
+Manual manifest install remains available when you need explicit per-host settings:
+
 ```bash
 bash skills/entity-mc/install.sh --manifest skills/entity-mc/manifests/scotty.env
 ```
 
 Optional flags:
+
+```bash
+bash skills/entity-mc/install-auto.sh \
+  --workspace /path/to/openclaw-workspace \
+  --agent Scotty \
+  --install-cron true
+```
 
 ```bash
 bash skills/entity-mc/install.sh \
@@ -104,7 +121,7 @@ An install is only done when:
 - runtime files are present
 - wrappers or symlinks exist in target scripts dir
 - version file is written
-- cron block is present exactly once when enabled
+- cron block is present exactly once by default
 - portable context files are installed
 - `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
