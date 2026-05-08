@@ -13,6 +13,7 @@ entity-mc/
 ├── install.sh
 ├── lib.sh
 ├── rollback.sh
+├── context/mc-intake-setup.md
 ├── source-scripts/mc-assign-model.sh
 ├── source-scripts/mc-auto-pull.sh
 ├── source-scripts/mc-build-context.sh
@@ -29,7 +30,7 @@ From inside the target OpenClaw-compatible workspace:
 bash skills/entity-mc/install-auto.sh
 ```
 
-That command writes an auto manifest, installs the runtime wrappers, installs the default Entity MC cron block, and runs verification.
+That command writes an auto manifest, installs the runtime wrappers, installs the default Entity MC cron block, installs portable MC/intake setup context, and runs verification.
 
 If the bundle is outside the target workspace, pass the workspace explicitly:
 

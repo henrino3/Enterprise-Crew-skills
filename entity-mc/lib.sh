@@ -104,6 +104,7 @@ entity_mc_context_files() {
   cat <<'EOF'
 mc-operating-rules.md
 entity-mc-context.md
+mc-intake-setup.md
 task-closure-contract.md
 EOF
 }

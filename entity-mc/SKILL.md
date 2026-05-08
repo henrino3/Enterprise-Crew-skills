@@ -14,7 +14,7 @@ This skill packages the current MC helper runtime into one installable bundle:
 - `mc-build-context.sh`
 - `mc-stall-check.sh`
 - `mc-intake.sh`
-- `.entity-mc/context/*.md` portable MC operating memory
+- `.entity-mc/context/*.md` portable MC operating memory, including intake setup guidance
 
 It also handles:
 - per-agent manifests
@@ -48,7 +48,7 @@ Optional:
 - `ENTITY_MC_MODE` (`copy` or `symlink`, default `copy`)
 - `ENTITY_MC_ENABLE_AUTO_PULL` (`true|false`)
 - `ENTITY_MC_ENABLE_STALL_CHECK` (`true|false`)
-- `ENTITY_MC_ENABLE_INTAKE` (`true|false`, default `false`)
+- `ENTITY_MC_ENABLE_INTAKE` (`true|false`, default `false`; enable only after writing a source-specific intake policy)
 - `ENTITY_MC_INTAKE_SCHEDULE`
 - `ENTITY_MC_CONTEXT_DIR` (derived from `ENTITY_MC_STATE_DIR`, installed automatically)
 - `ENTITY_MC_AUTO_PULL_SCHEDULE`
@@ -64,7 +64,7 @@ Preferred one-command install from inside the target workspace:
 bash skills/entity-mc/install-auto.sh
 ```
 
-This creates an auto manifest for the current workspace, installs runtime wrappers, writes the Entity MC cron block, and runs verification.
+This creates an auto manifest for the current workspace, installs runtime wrappers, writes the Entity MC cron block, installs portable MC/intake setup context into `.entity-mc/context/`, and runs verification.
 
 Manual manifest install remains available when you need explicit per-host settings:
 
@@ -122,7 +122,7 @@ An install is only done when:
 - wrappers or symlinks exist in target scripts dir
 - version file is written
 - cron block is present exactly once by default
-- portable context files are installed
+- portable context files are installed, including `mc-intake-setup.md`
 - `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
 
@@ -152,7 +152,7 @@ echo '{"title":"Fix docs link","description":"Broken in thread...","assignee":"A
 bash scripts/mc-intake.sh scan-file .entity-mc/intake/inbox.jsonl --dry-run
 ```
 
-Optional cron support is controlled by `ENTITY_MC_ENABLE_INTAKE=true`; by default it is off because each host needs an explicit source watcher/inbox policy.
+Optional cron support is controlled by `ENTITY_MC_ENABLE_INTAKE=true`; by default it is off because each installed workspace needs an explicit source watcher/inbox policy. The bundle installs `mc-intake-setup.md` into `.entity-mc/context/` so onboarding agents know how to write that local policy before enabling intake.
 
 ## Portable operating memory
 
@@ -162,6 +162,7 @@ Included context:
 
 - `mc-operating-rules.md` — when to use MC, lifecycle, evidence, duplicate avoidance.
 - `entity-mc-context.md` — what the runtime installs, manifest contract, structured intake behavior.
+- `mc-intake-setup.md` — how to define source-specific intake policy, candidate JSON/JSONL shape, dedupe keys, and safe enablement.
 - `task-closure-contract.md` — exact review/blocker note requirements.
 
 Keep these files public-safe. Do not add private hostnames, tokens, personal data, or Henry-specific secrets. Put host-specific facts in manifests or local memory, not in the public bundle.
