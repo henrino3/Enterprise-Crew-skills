@@ -9,6 +9,7 @@ A new operator should be able to install the Entity MC bundle and get:
 - Mission Control helper scripts installed into the workspace.
 - Default operational crons installed automatically.
 - Portable MC operating memory installed locally.
+- A task intake policy installed locally, so agents know which work belongs on the board.
 - Intake setup guidance installed locally, so future task intake can be configured safely.
 - A verification pass proving the install worked.
 
@@ -52,6 +53,7 @@ The auto installer:
 6. Installs portable context into:
    - `.entity-mc/context/mc-operating-rules.md`
    - `.entity-mc/context/entity-mc-context.md`
+   - `.entity-mc/context/mc-task-intake-policy.md`
    - `.entity-mc/context/mc-intake-setup.md`
    - `.entity-mc/context/task-closure-contract.md`
 7. Creates the intake inbox directory:
@@ -106,6 +108,25 @@ or:
 bash scripts/mc.sh note <task_id> "BLOCKED: ..."
 ```
 
+## What gets put on the board
+
+The bundle installs `.entity-mc/context/mc-task-intake-policy.md`. That file is the durable local memory for agents.
+
+Core rule:
+
+> If work is more than a quick reply, put it on the board or update an existing board task before executing.
+
+Use Mission Control for work that is:
+
+- More than a few minutes.
+- Multi-step or likely to survive compaction/restart.
+- Assigned to another agent or needs handoff/resume.
+- A bug, deploy, runtime, data, config, customer, or docs issue.
+- A build, research, QA, release, migration, integration, automation, or follow-up.
+- Anything where evidence/status should be visible later.
+
+The auto-pull cron does not invent tasks. It pulls tasks that already exist. Auto task creation requires a watcher/source feeding structured candidates into `mc-intake.sh`.
+
 ## MC intake: what it is
 
 MC intake is how external sources become Mission Control tasks.
@@ -146,6 +167,7 @@ That document tells the newly installed agent/operator how to define intake safe
 Before enabling intake, the workspace should define:
 
 - Allowed sources.
+- Which source events should become tasks, using `.entity-mc/context/mc-task-intake-policy.md` as the default rulebook.
 - Source owner.
 - Required candidate JSON fields.
 - Optional candidate JSON fields.
@@ -269,6 +291,7 @@ After onboarding, verify:
 ```bash
 test -f skills/entity-mc/SKILL.md
 test -f skills/entity-mc/manifests/auto.env
+test -f .entity-mc/context/mc-task-intake-policy.md
 test -f .entity-mc/context/mc-intake-setup.md
 ls scripts/mc*.sh
 crontab -l | grep ENTITY_MC
@@ -278,6 +301,6 @@ bash skills/entity-mc/verify.sh --manifest skills/entity-mc/manifests/auto.env
 Expected result:
 
 - Runtime scripts exist.
-- Portable context exists.
+- Portable context exists, including the task intake policy.
 - The cron block exists exactly once.
 - Verification prints `VERIFY_OK`.
