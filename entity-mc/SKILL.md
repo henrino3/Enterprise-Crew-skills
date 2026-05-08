@@ -14,7 +14,7 @@ This skill packages the current MC helper runtime into one installable bundle:
 - `mc-build-context.sh`
 - `mc-stall-check.sh`
 - `mc-intake.sh`
-- `.entity-mc/context/*.md` portable MC operating memory, including intake setup guidance
+- `.entity-mc/context/*.md` portable MC operating memory, including task-intake policy and intake setup guidance
 
 It also handles:
 - per-agent manifests
@@ -123,7 +123,7 @@ An install is only done when:
 - wrappers or symlinks exist in target scripts dir
 - version file is written
 - cron block is present exactly once by default
-- portable context files are installed, including `mc-intake-setup.md`
+- portable context files are installed, including `mc-task-intake-policy.md` and `mc-intake-setup.md`
 - `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
 
@@ -163,6 +163,7 @@ Included context:
 
 - `mc-operating-rules.md` — when to use MC, lifecycle, evidence, duplicate avoidance.
 - `entity-mc-context.md` — what the runtime installs, manifest contract, structured intake behavior.
+- `mc-task-intake-policy.md` — what work should become a board task, routing defaults, columns, and automatic intake rules.
 - `mc-intake-setup.md` — how to define source-specific intake policy, candidate JSON/JSONL shape, dedupe keys, and safe enablement.
 - `task-closure-contract.md` — exact review/blocker note requirements.
 
