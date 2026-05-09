@@ -1,0 +1,2 @@
+openclaw|openclaw|workspace) AGENT="Ada" ;;
+openclaw-*) AGENT="${base#clawd-}" ;;

@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-MC_API="http://<REDACTED_IP>:<PORT>/api/tasks"
+MC_API="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}/api/tasks"
 DRY_RUN="${1:-}"
 
 # Model aliases → full IDs

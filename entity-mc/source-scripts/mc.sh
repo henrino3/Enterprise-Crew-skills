@@ -11,10 +11,10 @@ normalize_output_links() {
     local normalized="$text"
 
     normalized=$(printf '%s' "$normalized" | sed -E 's#https?://[^ )]+:8788/([^ )]+)#'"$entity_base"'/docs/\1#g')
-    normalized=$(printf '%s' "$normalized" | sed -E 's#~/(clawd|clawd-spock|clawd-scotty)/output/([^ )]+)#'"$entity_base"'/docs/output/\2#g')
-    normalized=$(printf '%s' "$normalized" | sed -E 's#~/(clawd|clawd-spock|clawd-scotty)/memory/([^ )]+)#'"$entity_base"'/docs/memory/\2#g')
-    normalized=$(printf '%s' "$normalized" | sed -E 's#/home/(henrymascot|jamify)/(clawd|clawd-spock|clawd-scotty)/output/([^ )]+)#'"$entity_base"'/docs/output/\3#g')
-    normalized=$(printf '%s' "$normalized" | sed -E 's#/home/(henrymascot|jamify)/(clawd|clawd-spock|clawd-scotty)/memory/([^ )]+)#'"$entity_base"'/docs/memory/\3#g')
+    normalized=$(printf '%s' "$normalized" | sed -E 's#~/[^/]+/output/([^ )]+)#'"$entity_base"'/docs/output/\1#g')
+    normalized=$(printf '%s' "$normalized" | sed -E 's#~/[^/]+/memory/([^ )]+)#'"$entity_base"'/docs/memory/\1#g')
+    normalized=$(printf '%s' "$normalized" | sed -E 's#/home/[^/]+/[^/]+/output/([^ )]+)#'"$entity_base"'/docs/output/\1#g')
+    normalized=$(printf '%s' "$normalized" | sed -E 's#/home/[^/]+/[^/]+/memory/([^ )]+)#'"$entity_base"'/docs/memory/\1#g')
     normalized=$(printf '%s' "$normalized" | sed -E 's#(^|[[:space:]])output/([^ )]+)#\1'"$entity_base"'/docs/output/\2#g')
     normalized=$(printf '%s' "$normalized" | sed -E 's#(^|[[:space:]])memory/([^ )]+)#\1'"$entity_base"'/docs/memory/\2#g')
 
@@ -24,8 +24,8 @@ normalize_output_links() {
 normalize_output_links() {
     local val="$1"
     # Rewrite legacy docsify links to Entity docs links.
-    val=$(echo "$val" | sed -E 's#https?://[^ ]+:8788/(output|memory|workspace)/#http://<REDACTED_IP>:<PORT>/docs/\1/#g')
-    val=$(echo "$val" | sed -E 's#https?://[^ ]+:8788/#http://<REDACTED_IP>:<PORT>/docs/workspace/#g')
+    val=$(echo "$val" | sed -E 's#https?://[^ ]+:8788/(output|memory|workspace)/#${MC_URL}/docs/\1/#g')
+    val=$(echo "$val" | sed -E 's#https?://[^ ]+:8788/#${MC_URL}/docs/workspace/#g')
     echo "$val"
 }
 
@@ -35,8 +35,8 @@ ENTITY_ACCESSIBLE_DIRS="output memory workspace plans skills"
 # Copy file to accessible location if needed, return Entity URL
 ensure_accessible_output() {
     local filepath="$1"
-    local workspace="${HOME}/clawd"
-    local entity_base="http://<REDACTED_IP>:<PORT>/docs"
+    local workspace="${HOME}"
+    local entity_base="${MC_URL}/docs"
     
     # Expand ~ and resolve path
     filepath="${filepath/#\~/$HOME}"
@@ -268,8 +268,8 @@ case "$1" in
         
         # Extract and validate file paths from output
         # Look for patterns like output/*, memory/*, ~/agent-workspace/*, /home/*/agent-workspace/*
-        WORKSPACE="${HOME}/clawd"
-        FILE_PATHS=$(echo "$OUTPUT" | grep -oE '(output|memory)/[^ )]+\.(md|txt|html|json|pdf|png|jpg)|~/agent-workspace/[^ )]+\.(md|txt|html|json|pdf|png|jpg)|/home/[^/]+/clawd[^/]*/[^ )]+\.(md|txt|html|json|pdf|png|jpg)')
+        WORKSPACE="${HOME}"
+        FILE_PATHS=$(echo "$OUTPUT" | grep -oE '(output|memory)/[^ )]+\.(md|txt|html|json|pdf|png|jpg)|~/[^ )]+\.(md|txt|html|json|pdf|png|jpg)|/home/[^/]+/[^ )]+\.(md|txt|html|json|pdf|png|jpg)')
         
         if [ -n "$FILE_PATHS" ]; then
             MISSING_FILES=""

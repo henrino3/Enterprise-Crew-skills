@@ -38,10 +38,10 @@ fi
 # ── 1. Always-load: baseline memory ──
 # These give every subagent awareness of tools, agents, and operational rules
 BASELINE_FILES=(
-  "$HOME/agent-workspace/memory/tools-reference.md"
-  "$HOME/agent-workspace/memory/agents-reference.md"
-  "$HOME/clawd/memory/tools-reference.md"
-  "$HOME/clawd/memory/agents-reference.md"
+  "$HOME/memory/tools-reference.md"
+  "$HOME/memory/agents-reference.md"
+  "$HOME/memory/tools-reference.md"
+  "$HOME/memory/agents-reference.md"
 )
 
 BASELINE_BLOCK=""
@@ -61,8 +61,8 @@ $BASELINE_BLOCK
 fi
 
 # ── 1b. Safety rules (NEVER/ALWAYS constraints) ──
-RULES_FILE="${ENTITY_MC_RULES_FILE:-$HOME/agent-workspace/memory/rules.md}"
-[ -f "$RULES_FILE" ] || RULES_FILE="$HOME/clawd/memory/rules.md"
+RULES_FILE="${ENTITY_MC_RULES_FILE:-$HOME/memory/rules.md}"
+[ -f "$RULES_FILE" ] || RULES_FILE="$HOME/memory/rules.md"
 if [ -f "$RULES_FILE" ]; then
   # Extract Safety and Credentials sections — the guardrails that prevent expensive mistakes
   SAFETY_BLOCK=$(sed -n '/^## Safety/,/^## [^S]/p' "$RULES_FILE" | head -30)
@@ -78,8 +78,8 @@ $DELEGATION_BLOCK
 fi
 
 # ── 1c. Learnings from past failures (top 20) ──
-LEARNINGS_FILE="${ENTITY_MC_LEARNINGS_FILE:-$HOME/agent-workspace/memory/learnings.md}"
-[ -f "$LEARNINGS_FILE" ] || LEARNINGS_FILE="$HOME/clawd/memory/learnings.md"
+LEARNINGS_FILE="${ENTITY_MC_LEARNINGS_FILE:-$HOME/memory/learnings.md}"
+[ -f "$LEARNINGS_FILE" ] || LEARNINGS_FILE="$HOME/memory/learnings.md"
 if [ -f "$LEARNINGS_FILE" ]; then
   OUTPUT+="## Known Pitfalls (from past failures)
 $(head -60 "$LEARNINGS_FILE")
@@ -88,8 +88,8 @@ $(head -60 "$LEARNINGS_FILE")
 fi
 
 # ── 1d. User preferences (how Henry wants work delivered) ──
-USER_MODEL="${ENTITY_MC_USER_MODEL_FILE:-$HOME/agent-workspace/memory/user-model.md}"
-[ -f "$USER_MODEL" ] || USER_MODEL="$HOME/clawd/memory/user-model.md"
+USER_MODEL="${ENTITY_MC_USER_MODEL_FILE:-$HOME/memory/user-model.md}"
+[ -f "$USER_MODEL" ] || USER_MODEL="$HOME/memory/user-model.md"
 if [ -f "$USER_MODEL" ]; then
   OUTPUT+="## User Preferences
 $(head -30 "$USER_MODEL")
@@ -101,7 +101,7 @@ fi
 if [ -n "$SKILL" ] && [ "$SKILL" != "null" ] && [ "$SKILL" != "none" ]; then
   # Try common skill locations
   SKILL_PATH=""
-  for dir in "$HOME/agent-workspace/skills/$SKILL" "$HOME/clawd/skills/$SKILL" "$HOME/.agents/skills/$SKILL" "$HOME/.openclaw/skills/$SKILL" "$HOME/.openclaw/extensions/acpx/skills/$SKILL"; do
+  for dir in "$HOME/skills/$SKILL" "$HOME/skills/$SKILL" "$HOME/.agents/skills/$SKILL" "$HOME/.openclaw/skills/$SKILL" "$HOME/.openclaw/extensions/acpx/skills/$SKILL"; do
     if [ -f "$dir/SKILL.md" ]; then
       SKILL_PATH="$dir/SKILL.md"
       break
@@ -127,12 +127,12 @@ if [ -n "$CONTEXT" ] && [ "$CONTEXT" != "null" ]; then
   CTX_BLOCK=""
   for cf in "${CTX_FILES[@]}"; do
     cf=$(echo "$cf" | xargs) # trim whitespace
-    # Resolve relative paths against target workspace, then common clawd workspace
+    # Resolve relative paths against target workspace, then common workspace
     if [[ "$cf" != /* ]]; then
-      if [ -f "$HOME/agent-workspace/$cf" ]; then
-        cf="$HOME/agent-workspace/$cf"
+      if [ -f "$HOME/$cf" ]; then
+        cf="$HOME/$cf"
       else
-        cf="$HOME/clawd/$cf"
+        cf="$HOME/$cf"
       fi
     fi
     if [ -f "$cf" ]; then
@@ -168,7 +168,7 @@ if [ -n "$QMD_BIN" ] && [ -x "$QMD_BIN" ]; then
   # Query expansion via Gemini Flash (cheapest, fastest)
   GEMINI_KEY="${GEMINI_API_KEY:-}"
   if [ -z "$GEMINI_KEY" ]; then
-    for kf in "$HOME/agent-workspace/secrets/gemini-api-key" "$HOME/agent-workspace/secrets/gemini" "$HOME/clawd/secrets/gemini-api-key" "$HOME/clawd/secrets/gemini" "$HOME/.hermes/secrets/gemini"; do
+    for kf in "$HOME/secrets/gemini-api-key" "$HOME/secrets/gemini" "$HOME/secrets/gemini-api-key" "$HOME/secrets/gemini" "$HOME/.hermes/secrets/gemini"; do
       [ -f "$kf" ] && GEMINI_KEY=$(cat "$kf") && break
     done
   fi
@@ -215,10 +215,10 @@ if [ -n "$QMD_BIN" ] && [ -x "$QMD_BIN" ]; then
       # Resolve qmd:// paths to real filesystem paths
       # Collection mapping: qmd://memory/ -> ~/agent-workspace/memory/, qmd://output/ -> ~/agent-workspace/output/, etc.
       REAL_PATH=$(echo "$filepath" | sed \
-        -e "s|^qmd://memory/|$HOME/agent-workspace/memory/|" \
-        -e "s|^qmd://output/|$HOME/agent-workspace/output/|" \
-        -e "s|^qmd://docs/|$HOME/agent-workspace/docs/|" \
-        -e "s|^qmd://skills/|$HOME/agent-workspace/skills/|")
+        -e "s|^qmd://memory/|$HOME/memory/|" \
+        -e "s|^qmd://output/|$HOME/output/|" \
+        -e "s|^qmd://docs/|$HOME/docs/|" \
+        -e "s|^qmd://skills/|$HOME/skills/|")
       # If still qmd:// or not absolute, skip
       if [[ "$REAL_PATH" == qmd://* ]] || [[ ! "$REAL_PATH" == /* ]]; then
         continue
@@ -239,49 +239,13 @@ $(head -100 "$REAL_PATH")
   fi
 else
   # Fallback: legacy keyword matching when qmd is not available
-  # Entity / MC project
-  if echo "$COMBINED" | grep -qiE 'entity|mission control|MC task|mc\.sh'; then
-    CTX_FILE="$HOME/agent-workspace/memory/entity-project-context.md"
-    [ -f "$CTX_FILE" ] || CTX_FILE="$HOME/clawd/memory/projects/entity/context.md"
-    if [ -f "$CTX_FILE" ] && ! echo "$CONTEXT" | grep -q "entity-project-context"; then
-      INFERRED_CTX+="--- entity-project-context.md (keyword-inferred) ---
-$(head -80 "$CTX_FILE")
-...
-"
-    fi
+  # Project-specific context discovery is handled by qmd above
+  # or by the agent reading its workspace memory files.
   fi
-  # SuperAda
-  if echo "$COMBINED" | grep -qiE 'superada|blog post|blog article|publish.*article'; then
-    CTX_FILE="$HOME/agent-workspace/memory/superada-context.md"
-    [ -f "$CTX_FILE" ] || CTX_FILE="$HOME/clawd/memory/superada-context.md"
-    if [ -f "$CTX_FILE" ] && ! echo "$CONTEXT" | grep -q "superada-context"; then
-      INFERRED_CTX+="--- superada-context.md (keyword-inferred) ---
-$(head -80 "$CTX_FILE")
-...
-"
-    fi
   fi
   # Soteria / insurance
-  if echo "$COMBINED" | grep -qiE 'soteria|insurance|claims|curacel'; then
-    CTX_FILE="$HOME/agent-workspace/memory/soteria-context.md"
-    [ -f "$CTX_FILE" ] || CTX_FILE="$HOME/clawd/memory/soteria-context.md"
-    if [ -f "$CTX_FILE" ] && ! echo "$CONTEXT" | grep -q "soteria-context"; then
-      INFERRED_CTX+="--- soteria-context.md (keyword-inferred) ---
-$(head -80 "$CTX_FILE")
-...
-"
-    fi
   fi
   # OpenClaw / gateway / infra
-  if echo "$COMBINED" | grep -qiE 'openclaw|clawdbot|gateway|cron|plugin|heartbeat'; then
-    CTX_FILE="$HOME/agent-workspace/memory/tools-setup.md"
-    [ -f "$CTX_FILE" ] || CTX_FILE="$HOME/clawd/memory/tools-reference.md"
-    if [ -f "$CTX_FILE" ] && ! echo "$CONTEXT" | grep -q "tools-setup"; then
-      INFERRED_CTX+="--- tools-setup.md (keyword-inferred) ---
-$(head -80 "$CTX_FILE")
-...
-"
-    fi
   fi
 fi
 

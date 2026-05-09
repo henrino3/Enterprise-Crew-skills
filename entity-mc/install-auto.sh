@@ -16,7 +16,7 @@ Defaults:
 
 Examples:
   bash skills/entity-mc/install-auto.sh
-  bash skills/entity-mc/install-auto.sh --agent Scotty --workspace /home/jamify/clawd-scotty
+  bash skills/entity-mc/install-auto.sh --agent MyAgent --workspace /path/to/workspace
 EOF
 }
 
@@ -83,8 +83,8 @@ TARGET_SKILL_DIR="$SKILLS_DIR/entity-mc"
 if [[ -z "$AGENT" ]]; then
   base="$(basename "$WORKSPACE")"
   case "$base" in
-    clawd|openclaw|workspace) AGENT="Ada" ;;
-    clawd-*) AGENT="${base#clawd-}" ;;
+openclaw|openclaw|workspace) AGENT="Ada" ;;
+openclaw-*|clawd-*) AGENT="${base#*-}" ;;
     *) AGENT="$base" ;;
   esac
   AGENT="$(python3 - "$AGENT" <<'PY'

@@ -10,20 +10,24 @@ STATE_DIR="${HOME}/.entity-mc"
 HEALTH_STATE="$STATE_DIR/health-state.json"
 
 # Agent SSH targets
-declare -A AGENT_HOSTS=(
-  [Ada]="localhost"
-  [Scotty]="jamify@<REDACTED_IP>"
-  [Spock]="henrymascot@<REDACTED_IP>"
-  [Book]="henrymascot@<REDACTED_IP>"
-  [Zora]="henrymascot@<REDACTED_IP>"
-)
+declare -A AGENT_HOSTS=()
+# Populate AGENT_HOSTS from ENTITY_MC_AGENT_HOSTS env var
+# Format: "AgentName=user@host;AgentName2=user@host2"
+if [ -n "${ENTITY_MC_AGENT_HOSTS:-}" ]; then
+  IFS=";" read -ra _hosts <<< "$ENTITY_MC_AGENT_HOSTS"
+  for _h in "${_hosts[@]}"; do
+    _name="${_h%%=*}"
+  _target="${_h#*=}"
+    AGENT_HOSTS["$_name"]="$_target"
+  done
+fi
 
 declare -A AGENT_CRON_LOGS=(
   [Ada]="$HOME/agent-workspace/.entity-mc/cron.log"
-  [Scotty]="/home/user/agent-workspace/.entity-mc/cron.log"
-  [Spock]="/home/user/agent-workspace/.entity-mc/cron.log"
-  [Book]="/Users/user/.hermes/.entity-mc/cron.log"
-  [Zora]="/Users/user/.openclaw-zora/.entity-mc/cron.log"
+  [Scotty]="$HOME/.entity-mc/cron.log"
+  [Spock]="$HOME/.entity-mc/cron.log"
+  [Book]="$HOME/.hermes/.entity-mc/cron.log"
+  [Zora]="$HOME/.openclaw-zora/.entity-mc/cron.log"
 )
 
 mkdir -p "$STATE_DIR"
