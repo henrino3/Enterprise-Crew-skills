@@ -3,7 +3,7 @@
 # Posts nag comments to Entity API for stalled doing items (>24h)
 set -euo pipefail
 
-MC_URL="http://<REDACTED_IP>:<PORT>"
+MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}"
 
 TASKS=$(curl -s "$MC_URL/api/tasks" 2>/dev/null)
 if [ -z "$TASKS" ]; then

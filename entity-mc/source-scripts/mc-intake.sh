@@ -5,7 +5,7 @@
 # Source-specific watchers can feed it explicit JSON/JSONL candidates.
 set -euo pipefail
 
-MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://<REDACTED_IP>:<PORT>}}"
+MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}"
 AGENT="${MC_USER:-${ENTITY_MC_AGENT_NAME:-Agent}}"
 CURL_MAX_TIME="${MC_CURL_MAX_TIME:-20}"
 DEFAULT_COLUMN="${ENTITY_MC_INTAKE_DEFAULT_COLUMN:-backlog}"

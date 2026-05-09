@@ -4,7 +4,7 @@
 # Run via cron every 30 min: */30 * * * * bash ~/agent-workspace/scripts/mc-health-check.sh >> ~/.entity-mc/health.log 2>&1
 set -euo pipefail
 
-MC_URL="http://<REDACTED_IP>:<PORT>"
+MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}"
 DISCORD_WEBHOOK="${MC_ESCALATOR_WEBHOOK:-}"
 STATE_DIR="${HOME}/.entity-mc"
 HEALTH_STATE="$STATE_DIR/health-state.json"

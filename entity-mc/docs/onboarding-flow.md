@@ -18,7 +18,7 @@ A new operator should be able to install the Entity MC bundle and get:
 Run this from the target workspace:
 
 ```bash
-git clone https://github.com/henrino3/enterprise-crew-skills.git /tmp/enterprise-crew-skills
+git clone https://github.com/h-mascot/enterprise-crew-skills.git /tmp/enterprise-crew-skills
 mkdir -p skills
 cp -R /tmp/enterprise-crew-skills/entity-mc skills/entity-mc
 bash skills/entity-mc/install-auto.sh

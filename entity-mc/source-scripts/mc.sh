@@ -2,8 +2,8 @@
 # Mission Control CLI helper
 # Usage: mc.sh <command> [args]
 
-MC_URL="http://<REDACTED_IP>:<PORT>"
-USER="${MC_USER:-Ada}"
+MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}"
+USER="${MC_USER:-Agent}"
 
 normalize_output_links() {
     local text="$1"

@@ -5,8 +5,8 @@
 # Includes tier-based model fallback per agent capability
 set -euo pipefail
 
-AGENT="${1:-Ada}"
-MC_URL="http://<REDACTED_IP>:<PORT>"
+AGENT="${1:-Agent}"
+MC_URL="${ENTITY_MC_MC_URL:-${MC_URL:-http://localhost:3000}}"
 MAX_DOING=10
 CURL_MAX_TIME="${MC_CURL_MAX_TIME:-20}"
 LOCK_DIR="${TMPDIR:-/tmp}"
