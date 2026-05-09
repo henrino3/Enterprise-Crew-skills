@@ -14,14 +14,16 @@ This skill packages the current MC helper runtime into one installable bundle:
 - `mc-build-context.sh`
 - `mc-stall-check.sh`
 - `mc-intake.sh`
-- `.entity-mc/context/*.md` portable MC operating memory, including task-intake policy and intake setup guidance
+- `memory/entity-mc/*.md` — portable MC operating memory installed into the workspace memory directory
+- `.entity-mc/context/*.md` — same context files also linked in the state directory
 
 It also handles:
 - per-agent manifests
 - idempotent install/update
 - safe cron registration
 - optional structured intake from JSON/JSONL into MC tasks
-- portable MC operating context installed into the target `.entity-mc/context/` directory
+- portable MC operating context installed into both `memory/entity-mc/` and `.entity-mc/context/`
+- AGENTS.md patched with startup read instruction for `memory/entity-mc/`
 - post-install verification
 - rollback to the previous runtime
 
@@ -123,7 +125,8 @@ An install is only done when:
 - wrappers or symlinks exist in target scripts dir
 - version file is written
 - cron block is present exactly once by default
-- portable context files are installed, including `mc-task-intake-policy.md` and `mc-intake-setup.md`
+- portable context files are installed in both `.entity-mc/context/` AND `memory/entity-mc/`
+- AGENTS.md contains the ENTITY_MC_MEMORY_START marker block
 - `mc.sh review` exists in the installed helper and `mc-intake.sh` can dry-run structured task creation
 - `verify.sh` passes
 

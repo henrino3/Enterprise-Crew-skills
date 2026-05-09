@@ -51,12 +51,10 @@ The auto installer:
 5. Installs runtime state into:
    - `.entity-mc/`
 6. Installs portable context into:
-   - `.entity-mc/context/mc-operating-rules.md`
-   - `.entity-mc/context/entity-mc-context.md`
-   - `.entity-mc/context/mc-task-intake-policy.md`
-   - `.entity-mc/context/mc-intake-setup.md`
-   - `.entity-mc/context/task-closure-contract.md`
-7. Creates the intake inbox directory:
+   - `.entity-mc/context/` (linked runtime copies)
+   - `memory/entity-mc/` (read by agents on session startup)
+7. Patches `AGENTS.md` with a startup read instruction for `memory/entity-mc/`.
+8. Creates the intake inbox directory:
    - `.entity-mc/intake/`
 8. Writes the default cron block.
 9. Runs verification.
@@ -293,6 +291,9 @@ test -f skills/entity-mc/SKILL.md
 test -f skills/entity-mc/manifests/auto.env
 test -f .entity-mc/context/mc-task-intake-policy.md
 test -f .entity-mc/context/mc-intake-setup.md
+test -f memory/entity-mc/mc-task-intake-policy.md
+test -f memory/entity-mc/mc-operating-rules.md
+grep -q ENTITY_MC_MEMORY_START AGENTS.md
 ls scripts/mc*.sh
 crontab -l | grep ENTITY_MC
 bash skills/entity-mc/verify.sh --manifest skills/entity-mc/manifests/auto.env
@@ -301,6 +302,7 @@ bash skills/entity-mc/verify.sh --manifest skills/entity-mc/manifests/auto.env
 Expected result:
 
 - Runtime scripts exist.
-- Portable context exists, including the task intake policy.
+- Portable context exists in both `.entity-mc/context/` and `memory/entity-mc/`.
+- AGENTS.md contains the startup read marker.
 - The cron block exists exactly once.
 - Verification prints `VERIFY_OK`.
