@@ -30,6 +30,18 @@ while IFS= read -r file; do
   [[ -f "$ENTITY_MC_CONTEXT_DIR/$file" ]] || fail "context file missing: $file"
 done < <(entity_mc_context_files)
 
+# Verify memory files were installed
+_mem_dir="$ENTITY_MC_TARGET_HOME/memory/entity-mc"
+[[ -d "$_mem_dir" ]] || fail "memory dir missing: $_mem_dir"
+while IFS= read -r file; do
+  [[ -f "$_mem_dir/$file" ]] || fail "memory file missing: $file"
+done < <(entity_mc_context_files)
+
+# Verify AGENTS.md has the startup read marker
+_agents="$ENTITY_MC_TARGET_HOME/AGENTS.md"
+[[ -f "$_agents" ]] || fail "AGENTS.md missing"
+grep -q 'ENTITY_MC_MEMORY_START' "$_agents" || fail "AGENTS.md missing ENTITY_MC memory marker"
+
 INTAKE_DRY_RUN="$($ENTITY_MC_BASH_BIN "$ENTITY_MC_TARGET_SCRIPTS_DIR/mc-intake.sh" create --title "Entity MC verify dry run" --description "verify" --assignee "$ENTITY_MC_AGENT_NAME" --dry-run 2>/dev/null || true)"
 printf '%s' "$INTAKE_DRY_RUN" | jq -e '.action == "dry_run" and (.payload.metadata | contains("\"intake\":true"))' >/dev/null \
   || fail "mc-intake dry-run failed"

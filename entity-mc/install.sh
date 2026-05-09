@@ -12,6 +12,8 @@ entity_mc_snapshot_previous
 entity_mc_stage_release
 entity_mc_activate_release
 entity_mc_install_wrappers
+entity_mc_install_memory
+entity_mc_patch_agents_md
 entity_mc_install_cron_block
 
 cat <<EOF

@@ -170,6 +170,50 @@ entity_mc_activate_release() {
   printf '%s\n' "$ENTITY_MC_VERSION" > "$ENTITY_MC_STATE_DIR/current-version"
 }
 
+# Copy portable MC context files into the workspace memory/ directory
+# so agents pick them up during session startup.
+entity_mc_install_memory() {
+  local _mem_dir="$ENTITY_MC_TARGET_HOME/memory/entity-mc"
+  mkdir -p "$_mem_dir"
+  while IFS= read -r file; do
+    if [[ -f "$ENTITY_MC_RELEASE_CONTEXT_DIR/$file" ]]; then
+      install -m 0644 "$ENTITY_MC_RELEASE_CONTEXT_DIR/$file" "$_mem_dir/$file"
+      entity_mc_log "memory: $_mem_dir/$file"
+    fi
+  done < <(entity_mc_context_files)
+}
+
+# Append a startup read instruction to AGENTS.md so the agent reads
+# the Entity MC memory files on every session start.
+entity_mc_patch_agents_md() {
+  local _agents="$ENTITY_MC_TARGET_HOME/AGENTS.md"
+  local _marker="<!-- ENTITY_MC_MEMORY_START -->"
+  local _marker_end="<!-- ENTITY_MC_MEMORY_END -->"
+
+  # If the marker block already exists, replace it
+  if [[ -f "$_agents" ]] && grep -q "$_marker" "$_agents" 2>/dev/null; then
+    local _tmp
+    _tmp="$(mktemp)"
+    awk -v start="$_marker" -v end="$_marker_end" -v block="$_marker\nRead memory/entity-mc/ for MC operating rules, intake policy, and closure contract.\n$_marker_end" '
+      $0 == start { print block; skip=1; next }
+      $0 == end { skip=0; next }
+      !skip { print }
+    ' "$_agents" > "$_tmp"
+    mv "$_tmp" "$_agents"
+    entity_mc_log "agents-md: updated existing marker block"
+    return 0
+  fi
+
+  # Otherwise append the block
+  cat >> "$_agents" <<'AGENTSEOF'
+
+<!-- ENTITY_MC_MEMORY_START -->
+Read `memory/entity-mc/` for MC operating rules, intake policy, and closure contract.
+<!-- ENTITY_MC_MEMORY_END -->
+AGENTSEOF
+  entity_mc_log "agents-md: appended startup read block"
+}
+
 entity_mc_install_wrappers() {
   while IFS= read -r file; do
     local target="$ENTITY_MC_TARGET_SCRIPTS_DIR/$file"
