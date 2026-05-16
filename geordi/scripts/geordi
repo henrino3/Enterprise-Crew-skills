@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.1.0"
+VERSION="1.1.1"
 ROOT="${GEORDI_PROJECT_ROOT:-$PWD}"
 STATE_DIR="$ROOT/.geordi"
 MISSION_FILE="$STATE_DIR/missions.jsonl"
@@ -22,6 +22,8 @@ Usage:
 Environment:
   GEORDI_CODEX_ARGS   default: exec --full-auto
   GEORDI_DROID_AUTO   default: medium
+  GEORDI_AGENTS_FILE  default: ~/.agents/AGENTS.md
+  GEORDI_REQUIRE_AGENTS default: 1
   GEORDI_PROJECT_ROOT default: current directory
 EOF
 }
@@ -35,6 +37,29 @@ require_git_repo() {
     echo "ERROR: $ROOT is not a git repository" >&2
     exit 1
   }
+}
+
+agents_file_path() {
+  local path="${GEORDI_AGENTS_FILE:-$HOME/.agents/AGENTS.md}"
+  printf '%s' "${path/#\~/$HOME}"
+}
+
+emit_agents_context() {
+  local file require
+  file="$(agents_file_path)"
+  require="${GEORDI_REQUIRE_AGENTS:-1}"
+  if [ -f "$file" ]; then
+    printf '## Global AGENTS.md context\n\n'
+    cat "$file"
+    printf '\n\n## Mission prompt\n\n'
+    return 0
+  fi
+  if [ "$require" = "0" ] || [ "$require" = "false" ]; then
+    return 0
+  fi
+  echo "ERROR: global AGENTS file missing: $file" >&2
+  echo "Set GEORDI_AGENTS_FILE to the shared AGENTS.md path or GEORDI_REQUIRE_AGENTS=0 to opt out." >&2
+  exit 1
 }
 
 parse_flag_value() {
@@ -62,9 +87,14 @@ has_flag() {
 
 cmd_doctor() {
   local mode="${1:-}"
+  local agents_file
   require_git_repo
   command -v git >/dev/null || { echo "ERROR: git missing" >&2; exit 1; }
   command -v python3 >/dev/null || { echo "ERROR: python3 missing" >&2; exit 1; }
+  agents_file="$(agents_file_path)"
+  if [ "${GEORDI_REQUIRE_AGENTS:-1}" != "0" ] && [ "${GEORDI_REQUIRE_AGENTS:-1}" != "false" ]; then
+    [ -f "$agents_file" ] || { echo "ERROR: global AGENTS file missing: $agents_file" >&2; exit 1; }
+  fi
   if [ -n "$mode" ]; then
     command -v "$mode" >/dev/null || { echo "ERROR: $mode runtime missing" >&2; exit 1; }
   fi
@@ -185,7 +215,7 @@ PY
     prompt_file="$run_dir/mission-$(printf '%03d' "$id").prompt.md"
     log_file="$run_dir/mission-$(printf '%03d' "$id").log"
     verify_file="$run_dir/mission-$(printf '%03d' "$id").verify.log"
-    mission_prompt "$mission" > "$prompt_file"
+    { emit_agents_context; mission_prompt "$mission"; } > "$prompt_file"
     rewrite_status "$id" running
     echo "running mission $id with $mode"
     if [ "$mode" = "codex" ]; then

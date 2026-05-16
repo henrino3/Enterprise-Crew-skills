@@ -1,7 +1,7 @@
 ---
 name: geordi
 description: Use when turning a coding goal or PRD into bounded build missions, running those missions with Codex or Droid, verifying outcomes separately, and preserving receipts. Geordi merges the former build-pipeline discipline with the installable mission runner.
-version: 1.1.0
+version: 1.1.1
 author: SuperAda
 license: MIT
 metadata:
@@ -19,6 +19,7 @@ The machinery is intentionally plain: define a goal, add missions, run one runti
 - Defines a **goal**: the operator outcome.
 - Breaks work into **missions**: bounded implementation units with acceptance checks.
 - Loads project context before building.
+- Prepends the shared global `AGENTS.md` context before every mission prompt.
 - Runs missions through **Codex** or **Droid**.
 - Keeps state in `.geordi/state/` so runs can be resumed or audited.
 - Separates implementation from verification.
@@ -50,6 +51,30 @@ geordi mission add "Add settings toggle" --accept "npm test"
 geordi run --mode codex
 geordi status
 ```
+
+## Global AGENTS context
+
+Geordi requires a global `AGENTS.md` file by default. This keeps mission runs aligned with the operator's shared agent rules before project-specific context is applied.
+
+Default path:
+
+```bash
+~/.agents/AGENTS.md
+```
+
+Override when needed:
+
+```bash
+GEORDI_AGENTS_FILE=/path/to/AGENTS.md geordi run --mode codex
+```
+
+To intentionally run without a global file:
+
+```bash
+GEORDI_REQUIRE_AGENTS=0 geordi run --mode codex
+```
+
+`geordi doctor` checks the global file unless `GEORDI_REQUIRE_AGENTS=0` is set.
 
 Droid version:
 

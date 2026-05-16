@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+- Requires global `AGENTS.md` context by default before Geordi mission prompts.
+- Adds `GEORDI_AGENTS_FILE` and `GEORDI_REQUIRE_AGENTS` controls for portable installs.
+- Updates Codex/Droid examples and build-loop reference to document the global context step.
+
 ## 1.1.0
 
 - Renames the public bundle and command to `geordi`.
