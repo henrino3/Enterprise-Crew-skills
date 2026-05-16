@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_TARBALL_URL="${GOD_SCALE_TARBALL_URL:-https://codeload.github.com/h-mascot/Enterprise-Crew-skills/tar.gz/refs/heads/main}"
+REPO_TARBALL_URL="${GOD_SCALE_TARBALL_URL:-https://codeload.github.com/h-mascot/Enterprise-Crew-skills/tar.gz/refs/tags/v1.0.0}"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="${GOD_SCALE_HOME:-$HOME/.god-scale}"
 BIN_DIR="${GOD_SCALE_BIN_DIR:-$HOME/.local/bin}"

@@ -5,7 +5,7 @@ Goal-Oriented Delivery Scale: a reusable agent workflow for goals, missions, Cod
 ## One-line install
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/h-mascot/Enterprise-Crew-skills/main/god-scale/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/h-mascot/Enterprise-Crew-skills/v1.0.0/god-scale/install.sh)
 ```
 
 ## Local install from clone

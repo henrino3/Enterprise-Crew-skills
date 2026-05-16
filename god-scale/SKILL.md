@@ -35,7 +35,7 @@ bash /tmp/Enterprise-Crew-skills/god-scale/install.sh
 Or one line:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/h-mascot/Enterprise-Crew-skills/main/god-scale/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/h-mascot/Enterprise-Crew-skills/v1.0.0/god-scale/install.sh)
 ```
 
 The installer copies the bundle into `~/.god-scale`, creates `~/.local/bin/god-scale`, and prints a verification command.
