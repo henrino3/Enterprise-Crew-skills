@@ -1,0 +1,261 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="1.0.0"
+ROOT="${GOD_SCALE_PROJECT_ROOT:-$PWD}"
+STATE_DIR="$ROOT/.god-scale"
+MISSION_FILE="$STATE_DIR/missions.jsonl"
+GOAL_FILE="$STATE_DIR/goal.md"
+
+usage() {
+  cat <<'EOF'
+GOD Scale — Goal-Oriented Delivery Scale
+
+Usage:
+  god-scale --version
+  god-scale doctor [--mode codex|droid]
+  god-scale init --goal TEXT [--mode codex|droid]
+  god-scale mission add TITLE --accept COMMAND [--scope TEXT]
+  god-scale run [--mode codex|droid] [--model MODEL_ID]
+  god-scale status
+
+Environment:
+  GOD_SCALE_CODEX_ARGS   default: exec --full-auto
+  GOD_SCALE_DROID_AUTO   default: medium
+  GOD_SCALE_PROJECT_ROOT default: current directory
+EOF
+}
+
+json_escape() {
+  python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+}
+
+require_git_repo() {
+  git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "ERROR: $ROOT is not a git repository" >&2
+    exit 1
+  }
+}
+
+parse_flag_value() {
+  local flag="$1"; shift
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = "$flag" ]; then
+      shift
+      [ "$#" -gt 0 ] || return 1
+      printf '%s' "$1"
+      return 0
+    fi
+    shift || true
+  done
+  return 1
+}
+
+has_flag() {
+  local flag="$1"; shift
+  while [ "$#" -gt 0 ]; do
+    [ "$1" = "$flag" ] && return 0
+    shift || true
+  done
+  return 1
+}
+
+cmd_doctor() {
+  local mode="${1:-}"
+  require_git_repo
+  command -v git >/dev/null || { echo "ERROR: git missing" >&2; exit 1; }
+  command -v python3 >/dev/null || { echo "ERROR: python3 missing" >&2; exit 1; }
+  if [ -n "$mode" ]; then
+    command -v "$mode" >/dev/null || { echo "ERROR: $mode runtime missing" >&2; exit 1; }
+  fi
+  if [ -f "$MISSION_FILE" ]; then
+    python3 - "$MISSION_FILE" <<'PY'
+import json, sys
+for i, line in enumerate(open(sys.argv[1]), 1):
+    if line.strip(): json.loads(line)
+print('missions: ok')
+PY
+  fi
+  echo "doctor: ok"
+}
+
+cmd_init() {
+  local goal mode
+  goal="$(parse_flag_value --goal "$@" || true)"
+  mode="$(parse_flag_value --mode "$@" || true)"
+  [ -n "$goal" ] || { echo "ERROR: --goal is required" >&2; exit 1; }
+  mkdir -p "$STATE_DIR/state"
+  cat > "$GOAL_FILE" <<EOF
+# Goal
+
+$goal
+
+Default mode: ${mode:-codex}
+Created: $(date -u '+%Y-%m-%dT%H:%M:%SZ')
+EOF
+  touch "$MISSION_FILE"
+  echo "initialized: $STATE_DIR"
+}
+
+cmd_mission_add() {
+  [ "$#" -ge 2 ] || { echo "ERROR: mission title required" >&2; exit 1; }
+  local title accept scope id
+  title="$1"; shift
+  accept="$(parse_flag_value --accept "$@" || true)"
+  scope="$(parse_flag_value --scope "$@" || true)"
+  [ -n "$accept" ] || { echo "ERROR: --accept COMMAND is required" >&2; exit 1; }
+  mkdir -p "$STATE_DIR/state"
+  touch "$MISSION_FILE"
+  id=$(awk 'END{print NR+1}' "$MISSION_FILE")
+  python3 - "$MISSION_FILE" "$id" "$title" "$accept" "$scope" <<'PY'
+import json, sys, datetime
+path, mid, title, accept, scope = sys.argv[1:]
+created_at = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+rec = {"id": int(mid), "title": title, "accept": accept, "scope": scope, "status": "pending", "created_at": created_at}
+with open(path, 'a') as f: f.write(json.dumps(rec)+"\n")
+PY
+  echo "mission added: $id"
+}
+
+mission_prompt() {
+  local mission_json="$1"
+  python3 - "$GOAL_FILE" "$mission_json" <<'PY'
+import json, sys, pathlib
+root_goal = pathlib.Path(sys.argv[1]).read_text() if pathlib.Path(sys.argv[1]).exists() else '# Goal\nNot provided'
+m = json.loads(sys.argv[2])
+print(f"""You are executing a GOD Scale mission.
+
+{root_goal}
+
+## Mission {m['id']}: {m['title']}
+
+Scope: {m.get('scope') or 'Use the smallest safe scope. Do not touch unrelated files.'}
+
+Acceptance command:
+{m['accept']}
+
+Rules:
+- Make the smallest change that satisfies the mission.
+- Do not commit unless explicitly asked.
+- Do not add secrets or private environment details.
+- Leave a concise summary of files changed and verification suggestions.
+""")
+PY
+}
+
+rewrite_status() {
+  local id="$1" status="$2"
+  python3 - "$MISSION_FILE" "$id" "$status" <<'PY'
+import json, sys, pathlib
+path=pathlib.Path(sys.argv[1]); target=int(sys.argv[2]); status=sys.argv[3]
+rows=[]
+for line in path.read_text().splitlines():
+    if not line.strip(): continue
+    rec=json.loads(line)
+    if rec.get('id') == target: rec['status']=status
+    rows.append(rec)
+path.write_text('\n'.join(json.dumps(r) for r in rows)+'\n')
+PY
+}
+
+cmd_run() {
+  require_git_repo
+  [ -f "$MISSION_FILE" ] || { echo "ERROR: no missions. Run god-scale init and mission add first." >&2; exit 1; }
+  local mode model run_dir
+  mode="$(parse_flag_value --mode "$@" || true)"; mode="${mode:-codex}"
+  model="$(parse_flag_value --model "$@" || true)"
+  command -v "$mode" >/dev/null || { echo "ERROR: $mode runtime missing" >&2; exit 1; }
+  run_dir="$STATE_DIR/state/run-$(date -u '+%Y%m%d-%H%M%S')"
+  mkdir -p "$run_dir"
+  git -C "$ROOT" status --short > "$run_dir/git-before.txt" || true
+  python3 - "$MISSION_FILE" <<'PY' > "$run_dir/pending.jsonl"
+import json, sys
+for line in open(sys.argv[1]):
+    if not line.strip(): continue
+    rec=json.loads(line)
+    if rec.get('status') in ('pending','failed'):
+        print(json.dumps(rec))
+PY
+  local count=0
+  while IFS= read -r mission; do
+    [ -n "$mission" ] || continue
+    count=$((count+1))
+    local id prompt_file log_file verify_file accept
+    id=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["id"])' "$mission")
+    prompt_file="$run_dir/mission-$(printf '%03d' "$id").prompt.md"
+    log_file="$run_dir/mission-$(printf '%03d' "$id").log"
+    verify_file="$run_dir/mission-$(printf '%03d' "$id").verify.log"
+    mission_prompt "$mission" > "$prompt_file"
+    rewrite_status "$id" running
+    echo "running mission $id with $mode"
+    if [ "$mode" = "codex" ]; then
+      # shellcheck disable=SC2086
+      codex ${GOD_SCALE_CODEX_ARGS:-exec --full-auto} "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+    elif [ "$mode" = "droid" ]; then
+      if [ -n "$model" ]; then
+        droid exec -m "$model" --auto "${GOD_SCALE_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+      else
+        droid exec --auto "${GOD_SCALE_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+      fi
+    else
+      echo "ERROR: unsupported mode: $mode" >&2; exit 1
+    fi
+    accept=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["accept"])' "$mission")
+    echo "verifying mission $id: $accept"
+    if (cd "$ROOT" && bash -lc "$accept") 2>&1 | tee "$verify_file"; then
+      rewrite_status "$id" verified
+    else
+      rewrite_status "$id" failed
+      echo "mission $id failed verification; see $verify_file" >&2
+      exit 1
+    fi
+  done < "$run_dir/pending.jsonl"
+  git -C "$ROOT" status --short > "$run_dir/git-after.txt" || true
+  {
+    echo "# GOD Scale run summary"
+    echo
+    echo "Run: $run_dir"
+    echo "Mode: $mode"
+    echo "Missions attempted: $count"
+    echo
+    echo "## Git after"
+    echo '```'
+    cat "$run_dir/git-after.txt"
+    echo '```'
+  } > "$run_dir/summary.md"
+  echo "run complete: $run_dir"
+}
+
+cmd_status() {
+  if [ -f "$GOAL_FILE" ]; then cat "$GOAL_FILE"; else echo "No GOD Scale goal found in $STATE_DIR"; fi
+  if [ -f "$MISSION_FILE" ]; then
+    python3 - "$MISSION_FILE" <<'PY'
+import json, sys
+print('\nMissions:')
+for line in open(sys.argv[1]):
+    if line.strip():
+        r=json.loads(line)
+        print(f"- {r['id']}: {r['status']} — {r['title']} :: {r['accept']}")
+PY
+  fi
+}
+
+case "${1:-}" in
+  --version) echo "god-scale $VERSION" ;;
+  doctor)
+    shift
+    mode="$(parse_flag_value --mode "$@" || true)"
+    cmd_doctor "$mode"
+    ;;
+  init) shift; cmd_init "$@" ;;
+  mission)
+    shift
+    [ "${1:-}" = "add" ] || { usage; exit 1; }
+    shift
+    cmd_mission_add "$@"
+    ;;
+  run) shift; cmd_run "$@" ;;
+  status) cmd_status ;;
+  -h|--help|"") usage ;;
+  *) usage; exit 1 ;;
+esac
