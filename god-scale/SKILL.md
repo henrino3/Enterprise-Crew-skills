@@ -28,14 +28,14 @@ The name is loud. The machinery is intentionally boring.
 From the source repo:
 
 ```bash
-git clone https://github.com/henrino3/enterprise-crew-skills.git /tmp/enterprise-crew-skills
-bash /tmp/enterprise-crew-skills/god-scale/install.sh
+git clone https://github.com/h-mascot/Enterprise-Crew-skills.git /tmp/enterprise-crew-skills
+bash /tmp/Enterprise-Crew-skills/god-scale/install.sh
 ```
 
 Or one line:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/henrino3/enterprise-crew-skills/main/god-scale/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/h-mascot/Enterprise-Crew-skills/main/god-scale/install.sh)
 ```
 
 The installer copies the bundle into `~/.god-scale`, creates `~/.local/bin/god-scale`, and prints a verification command.
