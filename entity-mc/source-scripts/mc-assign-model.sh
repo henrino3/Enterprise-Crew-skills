@@ -82,7 +82,7 @@ for i in $(seq 0 $((COUNT - 1))); do
   elif echo "$COMBINED" | grep -qiE '^evaluate|^benchmark|^compare|^assess|^review.*alternative|^analyze.*competitor|deep dive|market scan|competitive analysis|audit.*vendor'; then
     MODEL="sonnet"; REASON="research_evaluation"
 
-  # 4. Code tasks → codex + geordi-build-pipeline skill
+  # 4. Code tasks → codex + geordi skill
   elif echo "$COMBINED" | grep -qiE 'build |fix bug|pull request|deploy |refactor|implement |pr review|feature |endpoint|api route|migration|test.*code|code.*review|merge conflict|coding|add.*route|add.*endpoint|create.*script|write.*script'; then
     MODEL="codex"; REASON="coding_task"
 
@@ -108,11 +108,11 @@ for i in $(seq 0 $((COUNT - 1))); do
   fi
 
   # --- SKILL ASSIGNMENT ---
-  # Mid-to-complex coding → always geordi-build-pipeline (Geordi pipeline)
+  # Mid-to-complex coding → always geordi (Geordi builder workflow)
   if [ -n "$EXISTING_SKILL" ] && [ "$EXISTING_SKILL" != "null" ]; then
     SKILL="$EXISTING_SKILL"  # keep existing
   elif echo "$COMBINED" | grep -qiE 'build |fix bug|pull request|deploy |refactor|implement |pr review|feature |endpoint|api route|migration|code.*review|merge conflict|coding|add.*route|add.*endpoint|create.*script|write.*script'; then
-    SKILL="geordi-build-pipeline"
+    SKILL="geordi"
   elif echo "$COMBINED" | grep -qiE 'research|evaluat|benchmark|compare|analys|deep dive|market scan|competitive|investigate'; then
     SKILL="deep-research"
   elif echo "$COMBINED" | grep -qiE 'blog.*superada|publish.*superada|superada.*article|superada.*post'; then

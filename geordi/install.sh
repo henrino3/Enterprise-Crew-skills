@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_TARBALL_URL="${GOD_SCALE_TARBALL_URL:-https://codeload.github.com/h-mascot/Enterprise-Crew-skills/tar.gz/refs/tags/v1.0.0}"
+REPO_TARBALL_URL="${GEORDI_TARBALL_URL:-https://codeload.github.com/h-mascot/Enterprise-Crew-skills/tar.gz/refs/tags/v1.1.0}"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="${GOD_SCALE_HOME:-$HOME/.god-scale}"
-BIN_DIR="${GOD_SCALE_BIN_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="${GEORDI_HOME:-$HOME/.geordi}"
+BIN_DIR="${GEORDI_BIN_DIR:-$HOME/.local/bin}"
 TEMP_DIR=""
 
 cleanup() {
@@ -21,8 +21,8 @@ if [ ! -f "$SOURCE_DIR/SKILL.md" ] || [ ! -d "$SOURCE_DIR/scripts" ]; then
   command -v tar >/dev/null 2>&1 || { echo "ERROR: tar is required for remote install" >&2; exit 1; }
   TEMP_DIR="$(mktemp -d)"
   curl -fsSL "$REPO_TARBALL_URL" | tar -xz -C "$TEMP_DIR"
-  SOURCE_DIR="$(find "$TEMP_DIR" -type d -path '*/god-scale' | head -1)"
-  [ -n "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/SKILL.md" ] || { echo "ERROR: could not locate god-scale bundle in repository archive" >&2; exit 1; }
+  SOURCE_DIR="$(find "$TEMP_DIR" -type d -path '*/geordi' | head -1)"
+  [ -n "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/SKILL.md" ] || { echo "ERROR: could not locate geordi bundle in repository archive" >&2; exit 1; }
 fi
 
 mkdir -p "$INSTALL_DIR" "$BIN_DIR"
@@ -38,17 +38,17 @@ else
   mv "$INSTALL_DIR.tmp" "$INSTALL_DIR"
 fi
 
-cat > "$BIN_DIR/god-scale" <<'WRAPPER'
+cat > "$BIN_DIR/geordi" <<WRAPPER
 #!/usr/bin/env bash
 set -euo pipefail
-GOD_SCALE_HOME="${GOD_SCALE_HOME:-$HOME/.god-scale}"
-exec "$GOD_SCALE_HOME/scripts/god-scale" "$@"
+GEORDI_HOME="\${GEORDI_HOME:-$INSTALL_DIR}"
+exec "\$GEORDI_HOME/scripts/geordi" "\$@"
 WRAPPER
-chmod +x "$BIN_DIR/god-scale" "$INSTALL_DIR/scripts/god-scale"
+chmod +x "$BIN_DIR/geordi" "$INSTALL_DIR/scripts/geordi"
 
-echo "GOD Scale installed to $INSTALL_DIR"
-echo "Command: $BIN_DIR/god-scale"
-if ! command -v god-scale >/dev/null 2>&1; then
+echo "Geordi installed to $INSTALL_DIR"
+echo "Command: $BIN_DIR/geordi"
+if ! command -v geordi >/dev/null 2>&1; then
   echo "Note: $BIN_DIR is not on PATH for this shell. Add: export PATH=\"$BIN_DIR:\$PATH\""
 fi
-echo "Verify: $BIN_DIR/god-scale --version && $BIN_DIR/god-scale doctor"
+echo "Verify: $BIN_DIR/geordi --version && $BIN_DIR/geordi doctor"

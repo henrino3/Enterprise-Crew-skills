@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.0.0"
-ROOT="${GOD_SCALE_PROJECT_ROOT:-$PWD}"
-STATE_DIR="$ROOT/.god-scale"
+VERSION="1.1.0"
+ROOT="${GEORDI_PROJECT_ROOT:-$PWD}"
+STATE_DIR="$ROOT/.geordi"
 MISSION_FILE="$STATE_DIR/missions.jsonl"
 GOAL_FILE="$STATE_DIR/goal.md"
 
 usage() {
   cat <<'EOF'
-GOD Scale — Goal-Oriented Delivery Scale
+Geordi — bounded build missions for coding agents
 
 Usage:
-  god-scale --version
-  god-scale doctor [--mode codex|droid]
-  god-scale init --goal TEXT [--mode codex|droid]
-  god-scale mission add TITLE --accept COMMAND [--scope TEXT]
-  god-scale run [--mode codex|droid] [--model MODEL_ID]
-  god-scale status
+  geordi --version
+  geordi doctor [--mode codex|droid]
+  geordi init --goal TEXT [--mode codex|droid]
+  geordi mission add TITLE --accept COMMAND [--scope TEXT]
+  geordi run [--mode codex|droid] [--model MODEL_ID]
+  geordi status
 
 Environment:
-  GOD_SCALE_CODEX_ARGS   default: exec --full-auto
-  GOD_SCALE_DROID_AUTO   default: medium
-  GOD_SCALE_PROJECT_ROOT default: current directory
+  GEORDI_CODEX_ARGS   default: exec --full-auto
+  GEORDI_DROID_AUTO   default: medium
+  GEORDI_PROJECT_ROOT default: current directory
 EOF
 }
 
@@ -123,7 +123,7 @@ mission_prompt() {
 import json, sys, pathlib
 root_goal = pathlib.Path(sys.argv[1]).read_text() if pathlib.Path(sys.argv[1]).exists() else '# Goal\nNot provided'
 m = json.loads(sys.argv[2])
-print(f"""You are executing a GOD Scale mission.
+print(f"""You are Geordi, executing a bounded build mission.
 
 {root_goal}
 
@@ -160,7 +160,7 @@ PY
 
 cmd_run() {
   require_git_repo
-  [ -f "$MISSION_FILE" ] || { echo "ERROR: no missions. Run god-scale init and mission add first." >&2; exit 1; }
+  [ -f "$MISSION_FILE" ] || { echo "ERROR: no missions. Run geordi init and mission add first." >&2; exit 1; }
   local mode model run_dir
   mode="$(parse_flag_value --mode "$@" || true)"; mode="${mode:-codex}"
   model="$(parse_flag_value --model "$@" || true)"
@@ -190,12 +190,12 @@ PY
     echo "running mission $id with $mode"
     if [ "$mode" = "codex" ]; then
       # shellcheck disable=SC2086
-      codex ${GOD_SCALE_CODEX_ARGS:-exec --full-auto} "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+      codex ${GEORDI_CODEX_ARGS:-exec --full-auto} "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
     elif [ "$mode" = "droid" ]; then
       if [ -n "$model" ]; then
-        droid exec -m "$model" --auto "${GOD_SCALE_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+        droid exec -m "$model" --auto "${GEORDI_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
       else
-        droid exec --auto "${GOD_SCALE_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
+        droid exec --auto "${GEORDI_DROID_AUTO:-medium}" --cwd "$ROOT" "$(cat "$prompt_file")" 2>&1 | tee "$log_file"
       fi
     else
       echo "ERROR: unsupported mode: $mode" >&2; exit 1
@@ -212,7 +212,7 @@ PY
   done < "$run_dir/pending.jsonl"
   git -C "$ROOT" status --short > "$run_dir/git-after.txt" || true
   {
-    echo "# GOD Scale run summary"
+    echo "# Geordi run summary"
     echo
     echo "Run: $run_dir"
     echo "Mode: $mode"
@@ -227,7 +227,7 @@ PY
 }
 
 cmd_status() {
-  if [ -f "$GOAL_FILE" ]; then cat "$GOAL_FILE"; else echo "No GOD Scale goal found in $STATE_DIR"; fi
+  if [ -f "$GOAL_FILE" ]; then cat "$GOAL_FILE"; else echo "No Geordi goal found in $STATE_DIR"; fi
   if [ -f "$MISSION_FILE" ]; then
     python3 - "$MISSION_FILE" <<'PY'
 import json, sys
@@ -241,7 +241,7 @@ PY
 }
 
 case "${1:-}" in
-  --version) echo "god-scale $VERSION" ;;
+  --version) echo "geordi $VERSION" ;;
   doctor)
     shift
     mode="$(parse_flag_value --mode "$@" || true)"
